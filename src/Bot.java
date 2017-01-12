@@ -1,19 +1,18 @@
-import java.util.InputMismatchException;
-import java.util.Scanner;
-
 public class Bot extends Spieler{
-
-	static Spielfeld botGame = new Spielfeld();
+	
+	boolean isABot = true;
 	
 	public static void main(String[] args) {
-		botGame.gameLoop();;
+		//botGame.gameLoop();
 	}
 	
 	
 	public Bot(){
-		this.name = "Bot";
+		setName();
+		this.name = getName();
 		id++;
 		int a = 1;
+		//fill hand with cards 1-15:
 		for(int i = 0; i < coinCards.length; i++){
 			coinCards[i] = a;
 			a++;
@@ -21,12 +20,11 @@ public class Bot extends Spieler{
 	}
 	
 	
-	//Bot setzt immer den Betrag der Mitte, wenn dieser schon gesetzt ist den nächst höhren.
-	//wenn alle höheren schon gesetzt sind, sucht er den nächst tieferen, vom betrag ausgehen:
-	
-	
-	public int setzen(){
-		int a = Math.abs(botGame.getMitte());
+	//Bot setzt immer den Betrag der Mitte, wenn dieser schon gesetzt ist den nächst höheren.
+	//wenn alle höheren schon gesetzt sind, such er den nächst tieferen, vom betrag ausgehend:
+	//equivalent to playerInput, but this one is found by algorithm
+	public int whatToBet(Deck deck, Spieler p1, Spieler p2, int mitte){
+		int a = Math.abs(mitte);
 		int b = a;
 		boolean low = false;
 		
@@ -48,62 +46,50 @@ public class Bot extends Spieler{
 				a--;
 			}
 		}
-		return setzen(a);
+		int bet = a;
+		if(okayToBet(bet)){
+			refreshStuff(bet);
+			return bet;
+		}
+		else return 0;
 	}
 	
-	//return value of Coincard player chose, and turn its value in CoinCards[] to 0
-	//if player input has already been played -> retry
-	int a = 0;
-	public int setzen(int eingabe){
-		
-		//check if input has already been played
-		if (eingabe > 15 || eingabe <= 0){
-			System.out.println("Versuchs nochmal!");
-			return setzen();
+	public boolean okayToBet(int bet){
+		if (bet > 15 || bet <= 0){
+			System.out.println("Bet out of bounds");
+			return false;
 		}
-		if (coinCards[eingabe-1]==0){
-			System.out.println("Diesen Betrag hast du bereits gesetzt!");
-			return setzen();
-		}else{
-		
-		
-		//if not:
+		if (coinCards[bet-1]==0){
+			System.out.println("Bot tries to bet value multiple times");
+			return false;
+		}
+		return true;
+	}
+	
+	
+	//current card:
+	int a = 0;
+	//refreshes the array of cards left to play and the array of played cards
+	public void refreshStuff(int bet){
 		for(int i = 0; i < coinCards.length; i++){
-			if (coinCards[i]==eingabe){
+			if (coinCards[i]==bet){
 				coinCards[i] = 0;
 				break;
 			}
 		}
 		
-		playedCards[a] = eingabe;
+		playedCards[a] = bet;
 		a++;
-		
-		return eingabe;
-		}
 	}
 	
-	//user enters name
+	
+	
+	public void setName(){
+		this.name = "Bot 1";
+	}
 	public String getName(){
-	    return "Bot";
+	    return name;
 	}
 	
-	
-	//Debugging:
-
-	public void printCoins(){
-		String hand = "";
-		for (int i = 0; i < this.coinCards.length; i++) {
-			hand += this.coinCards[i];
-			hand += " ; ";
-		}
-		System.out.println("Verfügbar: " + hand);
-		
-		String played = "";
-		for (int i = 0; i < this.playedCards.length; i++) {
-			played += this.playedCards[i];
-			played += " ; ";
-		}
-		System.out.println("Gespielt: " + played);
-	} 
 }
 
